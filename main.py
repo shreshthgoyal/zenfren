@@ -1,8 +1,8 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.chat_history import InMemoryChatMessageHistory, BaseChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 import os
 import requests
@@ -13,7 +13,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 store = {}
-public_url = os.getenv("PUBLIC_URL")
+public_url = os.getenv("PUBLIC_URL", "https://your-ngrok-url.com")
 classify_url = f"{public_url}/classify"
 
 llm = ChatGoogleGenerativeAI(
@@ -24,7 +24,7 @@ llm = ChatGoogleGenerativeAI(
     max_retries=2,
 )
 
-def get_session_history(session_id: str):
+def get_session_history(session_id: str) -> BaseChatMessageHistory :
     if session_id not in store:
         store[session_id] = InMemoryChatMessageHistory()
     return store[session_id]
@@ -50,22 +50,50 @@ def classify_emotion(text):
     else:
         return "general"
 
-def create_prompt(emotion):
-    emo_prompt = get_prompt(emotion)
-    return ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "You are a conversational mental health assistant. Provide emotional support like a caring friend. " 
-                "Follow the guidelines based on the user's emotional state: \n\n"
-                f"{emo_prompt}"
-                "Answer in a friendly and conversational manner, like talking to a close friend. \n\n"
-            ),
-            MessagesPlaceholder(variable_name="messages"),
-        ]
-    )
+def detect_crisis(text):
+    crisis_keywords = ["self-harm", "suicide", "hurt myself", "kill myself", "end my life", "cut myself", "depressed"]
+    for keyword in crisis_keywords:
+        if keyword in text.lower():
+            return True
+    return False
 
-def handle_action(emotion):
+def create_prompt(emotion, crisis_detected=False):
+    if crisis_detected:
+        return ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "Act as a compassionate person, where your friend is in a crisis questioning their life, ask them to talk to someone who is close to them in family."
+                    "I'm really concerned about how you're feeling right now. It’s important to talk to someone who can offer more help."
+                    " Would you like me to connect you with a mental health professional or provide the contact for a crisis helpline? \n\n"
+                    "Answer in a very supportive, compassionate, and caring tone."
+                ),
+                MessagesPlaceholder(variable_name="messages"),
+            ]
+        )
+    else:
+        input = emotion
+        if session_id in store:
+            input = 'none'
+        emo_prompt = get_prompt(input)
+        return ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    "You are a conversational mental health assistant. Provide emotional support like a caring friend. " 
+                    "Follow the guidelines based on the user's emotional state: \n\n"
+                    f"{emo_prompt}"
+                    "Answer in a friendly and conversational manner, like talking to a close friend. \n\n"
+                ),
+                MessagesPlaceholder(variable_name="history"),
+                MessagesPlaceholder(variable_name="messages"),
+            ]
+        )
+
+def handle_action(emotion, crisis_detected=False):
+    if crisis_detected:
+        return "It sounds like you’re going through something really tough right now. I highly recommend talking to someone who can help you, like a mental health professional or a crisis counselor. Would you like me to provide you with contact information for support?"
+    
     actions = {
         "joy": "How about sharing this joy with a friend or writing it down so you can come back to it later? It’s always nice to hold onto moments like these.",
         "sadness": "It might help to take a few deep breaths or try a short mindfulness exercise. Or if you prefer, we can talk more about what’s troubling you.",
@@ -76,31 +104,29 @@ def handle_action(emotion):
 
 def generate_response(text, session_id):
     emotion = classify_emotion(text)
-    prompt = create_prompt(emotion)
+    crisis_detected = detect_crisis(text)
+    prompt = create_prompt(emotion, crisis_detected)
     chain = prompt | llm
     history = get_session_history(session_id)
-    with_message_history = RunnableWithMessageHistory(chain, get_session_history, input_messages_key="messages",)
+    with_message_history = RunnableWithMessageHistory(chain, get_session_history, input_messages_key="messages", history_messages_key="history",)
     config = {"configurable": {"session_id": session_id}}
-
     response = with_message_history.invoke({"messages": [HumanMessage(content=text)]}, config=config)
-    history.add_message(response)
-    action = handle_action(emotion)
+    action = handle_action(emotion, crisis_detected)
 
     return response.content, action
 
-text = "my dog name was rishabh"
-session_id = "abc1"
+text = "my dog died"
+session_id = "abc2"
 response_content, suggested_action = generate_response(text, session_id)
 
 print(response_content)
-print(suggested_action)
+# print(suggested_action)
 
+# text = "his name was rishabh"
+# session_id = "abc2"
+# response_content, suggested_action = generate_response(text, session_id)
 
-# response = with_message_history.invoke(
-#     {"messages": [HumanMessage(content="whats my name?")], "language": "Spanish"},
-#     config=config,
-# )
+# print(response_content)
 
-# print(response.content)
 
 
