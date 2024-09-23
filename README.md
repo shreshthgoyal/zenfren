@@ -1,4 +1,4 @@
-quotes in bg
-voice to text
-welcome custom message
-ui
+refactor
+connect backend
+add actions (breathing, journalling excel, mood tracking excel, )
+actions as individual features home page

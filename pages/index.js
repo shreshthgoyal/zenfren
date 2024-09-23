@@ -1,45 +1,112 @@
 import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import { MessageCircle, Users, Sunrise, Leaf } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
 
-  const handleNavigate = () => {
-    router.push('/express');
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.3 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 }
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-md w-full space-y-10 text-center">
-        <div className="mb-8 animate-bounce">
-          <svg className="mx-auto h-28 w-28 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        </div>
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-2">Your Cozy Corner</h1>
-        <p className="text-2xl text-gray-600 mb-8 font-light">A warm place to share your thoughts and feelings.</p>
-        <div 
-          className="inline-block px-10 py-4 text-lg font-medium rounded-full text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 shadow-lg cursor-pointer"
-          onClick={handleNavigate}
+    <div className="min-h-screen bg-gradient-to-br from-[#E6F0FF] to-[#F0E6FF] text-[#3A3A5C] font-sans overflow-hidden flex items-center justify-center">
+      <motion.div 
+        className="max-w-3xl w-full px-6 py-12 text-center"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div 
+          className="mb-12 relative"
+          variants={itemVariants}
         >
-          Open Up
-        </div>
-      </div>
-      <div className="mt-16 text-center">
-        <p className="text-xl text-gray-600 mb-6 font-light">Here for you, always.</p>
-        <div className="flex justify-center space-x-6">
-          {[
-            "M12 6v6m0 0v6m0-6h6m-6 0H6",
-            "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-            "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ].map((path, index) => (
-            <span key={index} className="bg-white p-4 rounded-full shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
-              <svg className="h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={path} />
-              </svg>
-            </span>
-          ))}
-        </div>
-      </div>
+          <svg className="w-40 h-40 mx-auto" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="90" stroke="#7C3AED" strokeWidth="2" strokeDasharray="565" strokeDashoffset="565">
+              <animate attributeName="stroke-dashoffset" from="565" to="0" dur="5s" repeatCount="indefinite" />
+            </circle>
+            <path d="M100 10 Q 110 50 150 90 Q 190 130 100 190 Q 10 130 50 90 Q 90 50 100 10" fill="none" stroke="#7C3AED" strokeWidth="2">
+              <animate attributeName="d" 
+                values="
+                  M100 10 Q 110 50 150 90 Q 190 130 100 190 Q 10 130 50 90 Q 90 50 100 10;
+                  M100 10 Q 150 50 170 100 Q 190 150 100 190 Q 10 150 30 100 Q 50 50 100 10;
+                  M100 10 Q 110 50 150 90 Q 190 130 100 190 Q 10 130 50 90 Q 90 50 100 10"
+                dur="10s" repeatCount="indefinite" />
+            </path>
+          </svg>
+        </motion.div>
+        
+        <motion.h1 
+          className="text-5xl md:text-6xl font-bold mb-6 leading-tight"
+          variants={itemVariants}
+        >
+          Welcome to <span className="text-[#7C3AED]">ZenFren</span>
+        </motion.h1>
+        
+        <motion.p 
+          className="text-xl md:text-2xl mb-12 text-[#5A5A7D]"
+          variants={itemVariants}
+        >
+          Your companion on the journey to inner peace.
+        </motion.p>
+        
+        <motion.button 
+          onClick={() => router.push('/express')}
+          className="bg-[#7C3AED] text-white px-10 py-4 rounded-full text-xl font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 shadow-lg"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Begin Your Journey
+        </motion.button>
+        
+        <motion.div 
+          className="mt-16"
+          variants={containerVariants}
+        >
+          <p className="text-lg mb-6">Discover paths to tranquility:</p>
+          <div className="flex justify-center space-x-8">
+            {[
+              { icon: MessageCircle, label: "Reflect" },
+              { icon: Users, label: "Connect" },
+              { icon: Sunrise, label: "Grow" },
+              { icon: Leaf, label: "Breathe" }
+            ].map((item, index) => (
+              <motion.div 
+                key={index}
+                className="text-center cursor-pointer"
+                variants={itemVariants}
+                whileHover={{ scale: 1.1 }}
+              >
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
+                  <item.icon className="w-8 h-8 text-[#7C3AED]" />
+                </div>
+                <p className="text-sm font-medium">{item.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.p 
+          className="mt-16 text-lg text-[#5A5A7D]"
+          variants={itemVariants}
+        >
+          Find balance in every moment with ZenFren.
+        </motion.p>
+      </motion.div>
     </div>
   );
 }
