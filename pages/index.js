@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Sunrise, Leaf } from 'lucide-react';
+import BreathingExercise from '@/components/BreathingExercise';
 
 export default function Home() {
   const router = useRouter();
@@ -83,7 +84,6 @@ export default function Home() {
               { icon: MessageCircle, label: "Reflect" },
               { icon: Users, label: "Connect" },
               { icon: Sunrise, label: "Grow" },
-              { icon: Leaf, label: "Breathe" }
             ].map((item, index) => (
               <motion.div 
                 key={index}
@@ -97,6 +97,7 @@ export default function Home() {
                 <p className="text-sm font-medium">{item.label}</p>
               </motion.div>
             ))}
+            <BreathingExercise triggerType="icon"/>
           </div>
         </motion.div>
 
