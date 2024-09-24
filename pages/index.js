@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users, Sunrise, Leaf } from 'lucide-react';
+import { MessageCircle, Users, Sunrise } from 'lucide-react';
 import BreathingExercise from '@/components/BreathingExercise';
+import MeditationComponent from '@/components/MeditationComponent';
 
 export default function Home() {
   const router = useRouter();
@@ -36,16 +37,35 @@ export default function Home() {
           variants={itemVariants}
         >
           <svg className="w-40 h-40 mx-auto" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="90" stroke="#7C3AED" strokeWidth="2" strokeDasharray="565" strokeDashoffset="565">
-              <animate attributeName="stroke-dashoffset" from="565" to="0" dur="5s" repeatCount="indefinite" />
-            </circle>
-            <path d="M100 10 Q 110 50 150 90 Q 190 130 100 190 Q 10 130 50 90 Q 90 50 100 10" fill="none" stroke="#7C3AED" strokeWidth="2">
-              <animate attributeName="d" 
-                values="
-                  M100 10 Q 110 50 150 90 Q 190 130 100 190 Q 10 130 50 90 Q 90 50 100 10;
-                  M100 10 Q 150 50 170 100 Q 190 150 100 190 Q 10 150 30 100 Q 50 50 100 10;
-                  M100 10 Q 110 50 150 90 Q 190 130 100 190 Q 10 130 50 90 Q 90 50 100 10"
-                dur="10s" repeatCount="indefinite" />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#7C3AED">
+                  <animate attributeName="offset" values="0;1;0" dur="20s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor="#3B82F6">
+                  <animate attributeName="offset" values="1;0;1" dur="20s" repeatCount="indefinite" />
+                </stop>
+              </linearGradient>
+            </defs>
+            <path d="M100,10 C150,10 190,50 190,100 C190,150 150,190 100,190 C50,190 10,150 10,100 C10,50 50,10 100,10 Z" fill="none" stroke="url(#gradient)" strokeWidth="4">
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from="0 100 100"
+                to="360 100 100"
+                dur="20s"
+                repeatCount="indefinite"
+              />
+            </path>
+            <path d="M100,30 C130,30 160,60 160,100 C160,140 130,170 100,170 C70,170 40,140 40,100 C40,60 70,30 100,30 Z" fill="none" stroke="url(#gradient)" strokeWidth="4">
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from="360 100 100"
+                to="0 100 100"
+                dur="15s"
+                repeatCount="indefinite"
+              />
             </path>
           </svg>
         </motion.div>
@@ -97,6 +117,7 @@ export default function Home() {
                 <p className="text-sm font-medium">{item.label}</p>
               </motion.div>
             ))}
+            <MeditationComponent triggerType="icon"/>
             <BreathingExercise triggerType="icon"/>
           </div>
         </motion.div>

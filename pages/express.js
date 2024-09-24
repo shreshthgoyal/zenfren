@@ -54,19 +54,20 @@ export default function ExpressAndChat() {
         const botMessage = 'I understand. Can you tell me more about that?';
         setMessages(prev => [...prev, { text: botMessage, sender: 'bot' }]);
         setIsTyping(false);
-        speak(botMessage);
+        if (ttsEnabled) {
+          speak(botMessage);
+        }
       }, 1500);
     }
   };
 
   const handleMicClick = () => {
     if (listening) {
-        stopRecognition();
+      stopRecognition();
     } else {
-        startRecognition();
+      startRecognition();
     }
-};
-
+  };
 
   const toggleTts = () => {
     setTtsEnabled(!ttsEnabled);

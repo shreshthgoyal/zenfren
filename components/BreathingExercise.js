@@ -129,7 +129,7 @@ const BreathingExercise = ({ triggerType = "button", triggerText = "Open Breathi
       <DrawerTrigger asChild>
         {TriggerComponent}
       </DrawerTrigger>
-      <DrawerContent className="bg-gradient-to-b from-blue-50 to-indigo-100 border-t border-indigo-200">
+      <DrawerContent className="bg-gradient-to-b from-blue-50 to-indigo-100 border-t border-indigo-200 h-auto">
         <div className="max-w-md mx-auto w-full">
           <DrawerHeader>
             <DrawerTitle className="text-2xl font-bold text-indigo-700">Breathing Exercise</DrawerTitle>
