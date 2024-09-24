@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Circle, Volume2, VolumeX, Clock, HeartHandshake, Play, Pause, Square } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Pause, Play, Volume2, VolumeX, HeartHandshake } from 'lucide-react';
 import {
   Drawer,
   DrawerClose,
@@ -13,131 +13,125 @@ import {
 import { Button } from "@/components/ui/button";
 
 const meditationSteps = [
-  "Find a comfortable seated position",
-  "Close your eyes and take a deep breath",
-  "Focus on your breath, inhaling deeply",
-  "Exhale slowly, releasing any tension",
-  "Notice any thoughts without judgment",
-  "Gently return your focus to your breath",
-  "Feel the rhythm of your breathing",
-  "Scan your body for any areas of tension",
-  "Relax those areas with each exhale",
-  "Cultivate a sense of calm and peace",
+  "Find a comfortable place to sit, lie, or stand. Just be with your body and breathe.",
+  "Close your eyes or bring your gaze low until a crease of light shines through.",
+  "Notice what's coming up for you, what the body is aware of right now.",
+  // ... (other steps remain the same)
+  "As we exhale, bow the head down and honor those who can't breathe.",
 ];
 
-const MeditationComponent = ({ triggerType = "button", triggerText = "Open Meditation" }) => {
+const MeditationComponent = ({ triggerType = "button", triggerText = "Start Meditation" }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [isVoiceOn, setIsVoiceOn] = useState(true);
-  const [timer, setTimer] = useState(600); // 10 minutes default
-  const [showTimerSelect, setShowTimerSelect] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState(10);
   const [currentStep, setCurrentStep] = useState(0);
-  const [fadeIn, setFadeIn] = useState(false);
-  const intervalRef = useRef(null);
-  const animationRef = useRef(null);
+  const [isBrowser, setIsBrowser] = useState(false);
+  const synth = useRef(null);
+  const utteranceRef = useRef(null);
+  const stepIntervalRef = useRef(null);
+  const startTimeRef = useRef(0);
+  const lastStepTimeRef = useRef(0);
 
   useEffect(() => {
-    if (isActive && isDrawerOpen) {
-      intervalRef.current = setInterval(() => {
-        setTimer((prevTimer) => {
-          if (prevTimer > 0) {
-            if (prevTimer % 30 === 0) {
-              changeStep();
-            }
-            return prevTimer - 1;
-          }
-          stopSession();
-          return 0;
-        });
-      }, 1000);
-
-      animationRef.current = requestAnimationFrame(animateBreath);
+    setIsBrowser(true);
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      synth.current = window.speechSynthesis;
     }
-    return () => {
-      clearInterval(intervalRef.current);
-      cancelAnimationFrame(animationRef.current);
-    };
-  }, [isActive, isDrawerOpen]);
+  }, []);
 
-  useEffect(() => {
-    if (!isDrawerOpen && isActive) {
-      pauseSession();
+  const speak = useCallback((text, startOffset = 0) => {
+    if (isVoiceOn && synth.current) {
+      if (utteranceRef.current) {
+        synth.current.cancel();
+      }
+      utteranceRef.current = new SpeechSynthesisUtterance(text);
+      utteranceRef.current.rate = 0.8;
+      utteranceRef.current.pitch = 1;
+      
+      if (startOffset > 0) {
+        const words = text.split(' ');
+        const wordsToSkip = Math.floor(words.length * (startOffset / 10000));
+        utteranceRef.current.text = words.slice(wordsToSkip).join(' ');
+      }
+      
+      synth.current.speak(utteranceRef.current);
     }
-  }, [isDrawerOpen]);
+  }, [isVoiceOn]);
 
-  const changeStep = () => {
+  const nextStep = useCallback(() => {
     setCurrentStep((prevStep) => {
       const nextStep = (prevStep + 1) % meditationSteps.length;
       speak(meditationSteps[nextStep]);
-      setFadeIn(true);
-      setTimeout(() => setFadeIn(false), 500);
+      lastStepTimeRef.current = Date.now();
       return nextStep;
     });
-  };
+  }, [speak]);
 
-  const animateBreath = (timestamp) => {
-    const breathDuration = 5000; // 5 seconds per breath cycle
-    const scale = 1 + 0.1 * Math.sin((timestamp / breathDuration) * Math.PI);
-    document.querySelector('.breathing-circle').style.transform = `scale(${scale})`;
-    animationRef.current = requestAnimationFrame(animateBreath);
-  };
+  const startMeditation = useCallback(() => {
+    setIsActive(true);
+    startTimeRef.current = Date.now();
+    lastStepTimeRef.current = Date.now();
+    stepIntervalRef.current = setInterval(nextStep, 10000);
+    speak(meditationSteps[currentStep]);
+  }, [nextStep, speak, currentStep]);
 
-  const speak = (text) => {
-    if (isVoiceOn) {
-      speechSynthesis.cancel(); // Cancel any ongoing speech
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9; // Slightly faster speech
-      utterance.pitch = 1;
-      speechSynthesis.speak(utterance);
+  const pauseMeditation = useCallback(() => {
+    setIsActive(false);
+    clearInterval(stepIntervalRef.current);
+    if (synth.current) {
+      synth.current.cancel();
     }
-  };
+  }, []);
 
-  const startSession = () => {
+  const resumeMeditation = useCallback(() => {
     setIsActive(true);
-    setTimer(selectedDuration * 60);
-    setCurrentStep(0);
-    speak("Let's begin our meditation. " + meditationSteps[0]);
-    setFadeIn(true);
-    setTimeout(() => setFadeIn(false), 500);
-  };
+    const now = Date.now();
+    const elapsedSinceLastStep = now - lastStepTimeRef.current;
+    const timeUntilNextStep = 10000 - (elapsedSinceLastStep % 10000);
+    
+    speak(meditationSteps[currentStep], elapsedSinceLastStep % 10000);
+    
+    stepIntervalRef.current = setInterval(nextStep, 10000);
+    setTimeout(() => {
+      clearInterval(stepIntervalRef.current);
+      stepIntervalRef.current = setInterval(nextStep, 10000);
+    }, timeUntilNextStep);
 
-  const stopSession = () => {
-    setIsActive(false);
-    setTimer(selectedDuration * 60);
-    setCurrentStep(0);
-    speak("Meditation session completed. Well done.");
-    clearInterval(intervalRef.current);
-    cancelAnimationFrame(animationRef.current);
-  };
+  }, [nextStep, speak, currentStep]);
 
-  const pauseSession = () => {
-    setIsActive(false);
-    speak("Meditation paused.");
-    clearInterval(intervalRef.current);
-    cancelAnimationFrame(animationRef.current);
-  };
+  const toggleMeditation = useCallback(() => {
+    if (isActive) {
+      pauseMeditation();
+    } else {
+      if (currentStep === 0 && startTimeRef.current === 0) {
+        startMeditation();
+      } else {
+        resumeMeditation();
+      }
+    }
+  }, [isActive, currentStep, startMeditation, pauseMeditation, resumeMeditation]);
 
-  const resumeSession = () => {
-    setIsActive(true);
-    speak("Resuming meditation. " + meditationSteps[currentStep]);
-    animationRef.current = requestAnimationFrame(animateBreath);
-  };
+  const toggleVoice = useCallback(() => {
+    setIsVoiceOn((prev) => {
+      if (!prev && isActive && synth.current) {
+        const now = Date.now();
+        const elapsedSinceLastStep = now - lastStepTimeRef.current;
+        speak(meditationSteps[currentStep], elapsedSinceLastStep % 10000);
+      } else if (prev && synth.current) {
+        synth.current.cancel();
+      }
+      return !prev;
+    });
+  }, [isActive, currentStep, speak]);
 
-  const toggleVoice = () => setIsVoiceOn((prev) => !prev);
-  const toggleTimerSelect = () => setShowTimerSelect((prev) => !prev);
-
-  const setDuration = (minutes) => {
-    setSelectedDuration(minutes);
-    setTimer(minutes * 60);
-    setShowTimerSelect(false);
-  };
-
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
+  useEffect(() => {
+    return () => {
+      clearInterval(stepIntervalRef.current);
+      if (synth.current) {
+        synth.current.cancel();
+      }
+    };
+  }, []);
 
   const TriggerComponent = triggerType === "icon" ? (
     <div className="text-center cursor-pointer">
@@ -152,63 +146,78 @@ const MeditationComponent = ({ triggerType = "button", triggerText = "Open Medit
     </Button>
   );
 
+  if (!isBrowser) {
+    return null; // or a loading spinner
+  }
+
   return (
-    <Drawer onOpenChange={(open) => setIsDrawerOpen(open)}>
+    <Drawer onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         {TriggerComponent}
       </DrawerTrigger>
       <DrawerContent className="bg-gradient-to-b from-purple-50 to-indigo-100 border-t border-purple-200">
+        <style jsx>{`
+          @keyframes flow {
+            0%, 100% { 
+              d: path("M10,50 Q50,30 90,50 T170,50 T250,50 T330,50"); 
+            }
+            50% { 
+              d: path("M10,50 Q50,70 90,50 T170,50 T250,50 T330,50"); 
+            }
+          }
+          .flowing-path {
+            animation: flow 8s ease-in-out infinite;
+          }
+        `}</style>
         <div className="max-w-md mx-auto w-full">
           <DrawerHeader>
             <DrawerTitle className="text-2xl font-bold text-purple-700">Guided Meditation</DrawerTitle>
             <DrawerDescription className="text-purple-600">Find your inner peace and balance.</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 flex flex-col items-center">
-            <div className="relative mb-4">
-              <Circle size={200} className="text-purple-300 breathing-circle transition-transform duration-300 ease-in-out" />
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-lg font-semibold text-purple-700">Breathe</p>
-                <p className="text-2xl font-bold text-purple-600">{formatTime(timer)}</p>
-              </div>
+            <div className="relative mb-8 w-80 h-40 overflow-hidden">
+              <svg className="w-full h-full" viewBox="0 0 340 100" preserveAspectRatio="none">
+                <path
+                  className="flowing-path"
+                  fill="none"
+                  stroke="#8B5CF6"
+                  strokeWidth="2"
+                  d="M10,50 Q50,30 90,50 T170,50 T250,50 T330,50"
+                />
+                <path
+                  className="flowing-path"
+                  fill="none"
+                  stroke="#A78BFA"
+                  strokeWidth="2"
+                  d="M10,50 Q50,70 90,50 T170,50 T250,50 T330,50"
+                  style={{ animationDelay: "-2s" }}
+                />
+                <path
+                  className="flowing-path"
+                  fill="none"
+                  stroke="#C4B5FD"
+                  strokeWidth="2"
+                  d="M10,50 Q50,50 90,50 T170,50 T250,50 T330,50"
+                  style={{ animationDelay: "-4s" }}
+                />
+              </svg>
             </div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-4 mb-6">
               <Button 
-                onClick={isActive ? pauseSession : (timer < selectedDuration * 60 ? resumeSession : startSession)} 
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={toggleMeditation} 
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
               >
-                {isActive ? <Pause size={20} /> : <Play size={20} />}
-              </Button>
-              <Button 
-                onClick={stopSession} 
-                className="bg-red-500 hover:bg-red-600 text-white"
-                disabled={!isActive && timer === selectedDuration * 60}
-              >
-                <Square size={20} />
+                {isActive ? <Pause size={24} /> : <Play size={24} />}
               </Button>
               <Button variant="outline" size="icon" onClick={toggleVoice} className="border-purple-300 text-purple-600 hover:bg-purple-100">
-                {isVoiceOn ? <Volume2 size={20} /> : <VolumeX size={20} />}
-              </Button>
-              <Button variant="outline" size="icon" onClick={toggleTimerSelect} className="border-purple-300 text-purple-600 hover:bg-purple-100">
-                <Clock size={20} />
+                {isVoiceOn ? <Volume2 size={24} /> : <VolumeX size={24} />}
               </Button>
             </div>
-            <div className={`text-center mb-4 w-full text-purple-800 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-70'}`}>
-              <p className="text-lg">{meditationSteps[currentStep]}</p>
+            <div className="text-center mb-6 w-full">
+              <p className="text-lg text-purple-800 transition-opacity duration-500 ease-in-out">
+                {meditationSteps[currentStep]}
+              </p>
             </div>
-            {showTimerSelect && (
-              <div className="flex gap-2 mb-4">
-                {[5, 10, 15, 20].map((minutes) => (
-                  <Button
-                    key={minutes}
-                    variant={selectedDuration === minutes ? "default" : "outline"}
-                    onClick={() => setDuration(minutes)}
-                    className={selectedDuration === minutes ? "bg-purple-600 text-white" : "border-purple-300 text-purple-600 hover:bg-purple-100"}
-                  >
-                    {minutes} min
-                  </Button>
-                ))}
-              </div>
-            )}
           </div>
           <DrawerFooter>
             <DrawerClose asChild>

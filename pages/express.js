@@ -33,10 +33,17 @@ export default function ExpressAndChat() {
     duration: 0.5
   };
 
-  const handleExpress = () => {
+  const handleExpress = async () => {
     if (input.trim() !== '') {
       const userMessage = input.trim();
-      const botMessage = "Hello! I'm here to listen and chat. How can I assist you today?";
+      const {response, action} = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: userMessage, sessionId: '1234' })
+      }).then(res => res.json());
+      const botMessage = response;
       setMessages([{ text: userMessage, sender: 'user' }, { text: botMessage, sender: 'bot' }]);
       setPhase('transition');
       setTimeout(() => setPhase('chat'), 500);
@@ -44,22 +51,29 @@ export default function ExpressAndChat() {
     }
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() !== '') {
       const userMessage = input.trim();
       setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
       setInput('');
       setIsTyping(true);
-      setTimeout(() => {
-        const botMessage = 'I understand. Can you tell me more about that?';
-        setMessages(prev => [...prev, { text: botMessage, sender: 'bot' }]);
-        setIsTyping(false);
-        if (ttsEnabled) {
-          speak(botMessage);
-        }
-      }, 1500);
+      const {response, action} = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: userMessage, sessionId: '1234' })
+      }).then(res => res.json());
+  
+      const botMessage = response;
+      setMessages(prev => [...prev, { text: botMessage, sender: 'bot' }]);
+      setIsTyping(false);
+      if (ttsEnabled) {
+        speak(botMessage);
+      }
     }
   };
+  
 
   const handleMicClick = () => {
     if (listening) {
