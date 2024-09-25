@@ -8,10 +8,9 @@ import MeditationComponent from './MeditationComponent';
 
 const WriteAction = () => (
   <Button 
-    onClick={() => console.log("Write action:", action)}
-    className="mt-2 bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+    className="bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
   >
-    Write: {action}
+    Write
   </Button>
 );
 
