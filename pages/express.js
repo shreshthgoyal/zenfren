@@ -35,39 +35,19 @@ export default function ExpressAndChat() {
     in: { opacity: 1, y: 0 },
     out: { opacity: 0, y: -20 },
   };
-  
+
   const pageTransition = {
     duration: 0.5
   };
 
-  const handleExpress = async () => {
-    if (input.trim() !== '') {
-      const userMessage = input.trim();
-      const { response } = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: userMessage, sessionId })
-      }).then(res => res.json());
-
-      const _response = `I understand that you may be feeling upset or frustrated right now.
-        However, using harmful language is not the solution. There are healthier ways to express your emotions. Would you like to talk about what's bothering you?`;
-
-      setMessages([{ text: userMessage, sender: 'user' }, { text: response || _response, sender: 'bot' }]);
-      setPhase('transition');
-      setTimeout(() => setPhase('chat'), 500);
-      setInput('');
-    }
-  };
-
-  const handleSend = async () => {
-    if (input.trim() !== '') {
+  async function sendMessage() {
+    if (input.trim() !== '' && !isTyping) {
       const userMessage = input.trim();
       setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
       setInput('');
       setIsTyping(true);
-      const { response } = await fetch('/api/chat', {
+
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -75,16 +55,25 @@ export default function ExpressAndChat() {
         body: JSON.stringify({ text: userMessage, sessionId })
       }).then(res => res.json());
 
-      const _response = `I understand that you may be feeling upset or frustrated right now.
-      However, using harmful language is not the solution. There are healthier ways to express your emotions. Would you like to talk about what's bothering you?`;
-
-      setMessages(prev => [...prev, { text: response || _response, sender: 'bot' }]);
       setIsTyping(false);
+
+      const newMessage = {
+        text: response.response || `I understand that you may be feeling upset or frustrated right now.
+        However, using harmful language is not the solution. There are healthier ways to express your emotions. Would you like to talk about what's bothering you?`,
+        sender: 'bot',
+        action: response.action || null
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+
       if (ttsEnabled) {
-        speak(response);
+        speak(newMessage.text);
       }
     }
   };
+
+  const handleExpress = () => sendMessage();
+  const handleSend = () => sendMessage();
 
   const handleMicClick = () => {
     listening ? stopRecognition() : startRecognition();
@@ -100,7 +89,7 @@ export default function ExpressAndChat() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex flex-col items-center justify-center font-sans p-4 sm:p-8">
-      <ExpressPage {...{ phase, pageVariants, pageTransition, input, setInput, listening, handleMicClick, handleExpress, isLoadingQuote, quote }} />
+      <ExpressPage {...{ phase, pageVariants, pageTransition, input, setInput, listening, handleMicClick, handleExpress, isLoadingQuote, quote, setPhase }} />
       <ChatPage {...{ phase, pageVariants, pageTransition, messages, isTyping, input, setInput, handleMicClick, listening, handleSend, toggleTts, ttsEnabled }} />
     </div>
   );

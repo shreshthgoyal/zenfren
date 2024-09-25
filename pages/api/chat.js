@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
     try {
-        console.log(req.body)
       const response = await fetch('http://127.0.0.1:5000/chat', {
         method: 'POST',
         // add headers to the request with cors

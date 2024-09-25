@@ -2,6 +2,33 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MicButton from './MicButton';
 import { FaMicrophoneSlash, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { Button } from './ui/button';
+import BreathingExercise from './BreathingExercise';
+import MeditationComponent from './MeditationComponent';
+
+const WriteAction = () => (
+  <Button 
+    onClick={() => console.log("Write action:", action)}
+    className="mt-2 bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+  >
+    Write: {action}
+  </Button>
+);
+
+const BreatheAction = () => (
+  <BreathingExercise triggerType="button" triggerText="Breathe Zen" />
+);
+
+const MeditateAction = () => (
+  <MeditationComponent triggerType="button" triggerText="Zenful Meditation" />
+);
+
+const GeneralAction = () => (
+  <div className="flex flex-row space-x-2">
+    <BreatheAction />
+    <MeditateAction />
+  </div>
+);
 
 export default function ChatPage({
   phase, pageVariants, pageTransition, messages, isTyping,
@@ -12,6 +39,29 @@ export default function ChatPage({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleKeyPress = async (e) => {
+    if (e.key === 'Enter' && input.trim() !== '') {
+      e.preventDefault();
+      handleSend(input);
+    }
+  };
+
+  const renderActionButton = (action) => {
+    const [actionType, ...actionDetails] = action.split(':');
+    const actionContent = actionDetails.join(':').trim();
+
+    switch (actionType.toLowerCase()) {
+      case 'write':
+        return <WriteAction />;
+      case 'breathe':
+        return <BreatheAction />;
+      case 'meditate':
+        return <MeditateAction />;
+      default:
+        return <GeneralAction />;
+    }
+  };
 
   return phase === 'chat' && (
     <motion.div
@@ -59,6 +109,7 @@ export default function ChatPage({
                 className={`max-w-3/4 p-3 rounded-lg ${message.sender === 'bot' ? 'bg-indigo-100 text-indigo-800' : 'bg-purple-100 text-purple-800'}`}
               >
                 <p className="text-lg">{message.text}</p>
+                {message.action && renderActionButton(message.action)}
               </div>
             </motion.div>
           ))}
@@ -74,7 +125,7 @@ export default function ChatPage({
             </motion.div>
           )}
         </AnimatePresence>
-        <div ref={messagesEndRef} /> {/* Empty div for scrolling into view */}
+        <div ref={messagesEndRef} />
       </div>
       <div className="flex w-full relative items-center mb-4">
         <input
@@ -83,12 +134,12 @@ export default function ChatPage({
           placeholder="Type your message..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          onKeyPress={handleKeyPress}
         />
         <MicButton listening={listening} handleMicClick={handleMicClick} />
         <button
           className="ml-4 px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-full hover:bg-indigo-700 transition duration-300 ease-in-out focus:outline-none"
-          onClick={handleSend}
+          onClick={() => handleSend(input)}
         >
           Send
         </button>

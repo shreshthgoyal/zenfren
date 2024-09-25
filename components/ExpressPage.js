@@ -15,6 +15,7 @@ export default function ExpressPage({
   handleExpress,
   isLoadingQuote,
   quote,
+  setPhase
 }) {
   const [showAlert, setShowAlert] = useState(false);
 
@@ -24,6 +25,7 @@ export default function ExpressPage({
       setTimeout(() => setShowAlert(false), 3000);
     } else {
       handleExpress();
+      setPhase('chat');
     }
   };
 
