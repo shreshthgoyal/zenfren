@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MicButton from './MicButton';
-import { FaMicrophoneSlash, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { HiDotsCircleHorizontal } from 'react-icons/hi';
 import { Button } from './ui/button';
 import BreathingExercise from './BreathingExercise';
 import MeditationComponent from './MeditationComponent';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 const WriteAction = () => (
-  <Button 
-    className="bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-  >
+  <Button className="w-full bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
     Write
   </Button>
 );
@@ -26,12 +26,46 @@ const GeneralAction = () => (
   <div className="flex flex-row space-x-2">
     <BreatheAction />
     <MeditateAction />
+    <WriteAction />
   </div>
 );
 
+const ActionPopover = () => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-indigo-600 hover:text-indigo-800 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50 rounded-full"
+      >
+        <HiDotsCircleHorizontal className="h-6 w-6" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-48 p-2 bg-white border border-indigo-100 rounded-xl shadow-lg">
+      <div className="space-y-2">
+        <BreatheAction />
+        <MeditateAction />
+        <WriteAction />
+      </div>
+    </PopoverContent>
+  </Popover>
+);
+
+const CustomActionMessage = "Here are some actions you can take.";
+
 export default function ChatPage({
-  phase, pageVariants, pageTransition, messages, isTyping,
-  input, setInput, handleMicClick, listening, handleSend, toggleTts, ttsEnabled,
+  phase,
+  pageVariants,
+  pageTransition,
+  messages,
+  isTyping,
+  input,
+  setInput,
+  handleMicClick,
+  listening,
+  handleSend,
+  toggleTts,
+  ttsEnabled,
 }) {
   const messagesEndRef = useRef(null);
 
@@ -39,7 +73,7 @@ export default function ChatPage({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleKeyPress = async (e) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter' && input.trim() !== '') {
       e.preventDefault();
       handleSend(input);
@@ -47,10 +81,8 @@ export default function ChatPage({
   };
 
   const renderActionButton = (action) => {
-    const [actionType, ...actionDetails] = action.split(':');
-    const actionContent = actionDetails.join(':').trim();
-
-    switch (actionType.toLowerCase()) {
+    const actionType = action.toLowerCase();
+    switch (actionType) {
       case 'write':
         return <WriteAction />;
       case 'breathe':
@@ -62,7 +94,9 @@ export default function ChatPage({
     }
   };
 
-  return phase === 'chat' && (
+  if (phase !== 'chat') return null;
+
+  return (
     <motion.div
       key="chat"
       variants={pageVariants}
@@ -70,53 +104,73 @@ export default function ChatPage({
       animate="in"
       exit="out"
       transition={pageTransition}
-      className="w-full max-w-2xl flex flex-col h-full"
+      className="w-full max-w-2xl flex flex-col h-full relative"
     >
-      <h1 className="text-3xl font-bold mb-4 text-indigo-700 text-center">Chat with AI</h1>
-      <div className="flex justify-end items-center mb-2">
+      <div className="flex justify-between items-center mb-6 bg-indigo-100 p-4 rounded-lg">
         <button
           onClick={toggleTts}
-          className="flex items-center text-indigo-600 focus:outline-none"
+          className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors duration-200 focus:outline-none"
         >
           {ttsEnabled ? (
-            <>
-              <FaVolumeUp className="text-2xl mr-2" />
-              <span className="font-semibold">Bot Voice On</span>
-            </>
+            <FaVolumeUp className="text-2xl" />
           ) : (
-            <>
-              <FaVolumeMute className="text-2xl mr-2" />
-              <span className="font-semibold">Bot Voice Off</span>
-            </>
+            <FaVolumeMute className="text-2xl" />
           )}
         </button>
+        <h1 className="text-3xl font-bold text-indigo-700 text-center flex-grow">Chat with AI</h1>
+        <ActionPopover />
       </div>
       <div
-        className="flex-grow overflow-y-auto mb-6 space-y-4 p-4 scrollbar"
+        className="flex-grow overflow-y-auto mb-6 p-4 scrollbar"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#A5B4FC #E0E7FF' }}
       >
         <AnimatePresence>
-          {messages.map((message, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className={`flex ${message.sender === 'bot' ? 'justify-start' : 'justify-end'}`}
-            >
-              <div
-                className={`max-w-3/4 p-3 rounded-lg ${message.sender === 'bot' ? 'bg-indigo-100 text-indigo-800' : 'bg-purple-100 text-purple-800'}`}
-              >
-                <p className="text-lg">{message.text}</p>
-                {message.action && renderActionButton(message.action)}
-              </div>
-            </motion.div>
-          ))}
+          {(() => {
+            let botMessageCount = 0;
+            return messages.map((message, index) => {
+              const isBot = message.sender === 'bot';
+              if (isBot) botMessageCount++;
+              const showActions = isBot && (botMessageCount === 1 || botMessageCount % 3 === 0);
+              const customMessage = showActions ? CustomActionMessage : '';
+
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${isBot ? 'justify-start' : 'justify-end'} mb-4`}
+                >
+                  <div
+                    className={`max-w-3/4 p-3 rounded-lg ${
+                      isBot ? 'bg-indigo-100 text-indigo-800' : 'bg-purple-100 text-purple-800'
+                    }`}
+                  >
+                    <p className="text-lg leading-relaxed">
+                      {message.text}
+                      {isBot && showActions && customMessage && (
+                        <span className="block mt-4">{customMessage}</span>
+                      )}
+                    </p>
+                    {showActions && message.action && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {message.action.map((action, actionIndex) => (
+                          <React.Fragment key={actionIndex}>
+                            {renderActionButton(action)}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            });
+          })()}
           {isTyping && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex justify-start"
+              className="flex justify-start mb-4"
             >
               <div className="bg-indigo-100 text-indigo-800 p-3 rounded-lg">
                 <p className="text-lg">Typing...</p>
