@@ -4,6 +4,7 @@ import MicButton from './MicButton';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import { HiDotsCircleHorizontal } from 'react-icons/hi';
 import { Button } from './ui/button';
+import { BsSend } from "react-icons/bs";
 import BreathingExercise from './BreathingExercise';
 import MeditationComponent from './MeditationComponent';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -117,7 +118,7 @@ export default function ChatPage({
             <FaVolumeMute className="text-2xl" />
           )}
         </button>
-        <h1 className="text-3xl font-bold text-indigo-700 text-center flex-grow">Chat with AI</h1>
+        <h1 className="text-3xl font-bold text-indigo-700 text-center flex-grow">Find Your Zen</h1>
         <ActionPopover />
       </div>
       <div
@@ -191,10 +192,10 @@ export default function ChatPage({
         />
         <MicButton listening={listening} handleMicClick={handleMicClick} />
         <button
-          className="ml-4 px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-full hover:bg-indigo-700 transition duration-300 ease-in-out focus:outline-none"
+          className="ml-2 px-4 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-full hover:bg-indigo-700 transition duration-300 ease-in-out focus:outline-none"
           onClick={() => handleSend(input)}
         >
-          Send
+          <BsSend />
         </button>
       </div>
     </motion.div>

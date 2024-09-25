@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Heart } from 'lucide-react';
@@ -18,6 +18,23 @@ export default function ExpressPage({
   setPhase
 }) {
   const [showAlert, setShowAlert] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+
+  const texts = [
+    "What's weighing on your mind today?",
+    "Your words matter, express yourself!",
+    "Go ahead,express yourself freely.",
+    "What’s on your mind? We’re listening.",
+    "Ready to share a story or vent a little?",
+  ];
+
+  useEffect(() => {
+    const textInterval = setInterval(() => {
+      setCurrentTextIndex((prevIndex) => (prevIndex + 1) % texts.length);
+    }, 4000); // Change text every 4 seconds
+
+    return () => clearInterval(textInterval); // Clean up interval on component unmount
+  }, [texts.length]);
 
   const handleExpressWithValidation = () => {
     if (input.trim() === '') {
@@ -48,9 +65,22 @@ export default function ExpressPage({
       <h1 className="text-4xl font-bold mb-4 text-indigo-700">
         Express Yourself
       </h1>
-      <p className="text-xl text-indigo-600 italic mb-2">
-        Feel free to share your thoughts...
-      </p>
+
+      <div className="h-8 mb-2">
+        <AnimatePresence mode='wait'>
+          <motion.p
+            key={currentTextIndex}
+            className="text-xl text-indigo-600 italic"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.5 }}
+          >
+            {texts[currentTextIndex]}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+
       <div className="w-full flex justify-center items-center mb-6">
         <textarea
           className="w-full h-48 p-4 text-xl bg-transparent rounded-xl resize-none overflow-auto transition duration-300 ease-in-out focus:outline-none scrollbar"
@@ -60,12 +90,14 @@ export default function ExpressPage({
         />
         <MicButton listening={listening} handleMicClick={handleMicClick} />
       </div>
+
       <button
         className="px-8 py-3 bg-indigo-600 text-white text-lg font-semibold rounded-full hover:bg-indigo-700 transition duration-300 ease-in-out focus:outline-none"
         onClick={handleExpressWithValidation}
       >
-        Share Thoughts
+        Send your thoughts our way.
       </button>
+
       <AnimatePresence>
         {showAlert && (
           <motion.div
@@ -79,12 +111,13 @@ export default function ExpressPage({
             <Alert variant="default" className="bg-indigo-100 border-indigo-300">
               <Heart className="h-4 w-4 text-pink-500 mr-2" />
               <AlertDescription className="text-indigo-700">
-                We'd love to hear from you! Feel free to share any thoughts when you're ready.
+                We're always here to listen whenever you're ready to share.
               </AlertDescription>
             </Alert>
           </motion.div>
         )}
       </AnimatePresence>
+
       {!isLoadingQuote && quote && (
         <div className="w-full flex justify-center mt-6 pointer-events-none">
           <p

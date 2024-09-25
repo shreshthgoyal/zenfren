@@ -74,14 +74,14 @@ export default function Home() {
           className="text-5xl md:text-6xl font-bold mb-6 leading-tight"
           variants={itemVariants}
         >
-          Welcome to <span className="text-[#7C3AED]">ZenFren</span>
+          Hey there! Welcome to <span className="text-[#7C3AED]">ZenFren</span>
         </motion.h1>
         
         <motion.p 
           className="text-xl md:text-2xl mb-12 text-[#5A5A7D]"
           variants={itemVariants}
         >
-          Your companion on the journey to inner peace.
+          A warm hug for your soul.
         </motion.p>
         
         <motion.button 
@@ -91,7 +91,7 @@ export default function Home() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Begin Your Journey
+          Take the first step.
         </motion.button>
         
         <motion.div 
@@ -126,7 +126,7 @@ export default function Home() {
           className="mt-16 text-lg text-[#5A5A7D]"
           variants={itemVariants}
         >
-          Find balance in every moment with ZenFren.
+          Take a deep breath, you've got this. ZenFren is by your side.
         </motion.p>
       </motion.div>
     </div>
