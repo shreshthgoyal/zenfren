@@ -5,6 +5,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { useQuotes } from '../hooks/useQuotes';
 import { v4 as uuidv4 } from 'uuid';
+import Mascot from '../components/Mascot';
 
 export default function ExpressAndChat() {
   const [phase, setPhase] = useState('express');
@@ -89,6 +90,7 @@ export default function ExpressAndChat() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex flex-col items-center justify-center font-sans p-4 sm:p-8">
+      <Mascot />
       <ExpressPage {...{ phase, pageVariants, pageTransition, input, setInput, listening, handleMicClick, handleExpress, isLoadingQuote, quote, setPhase }} />
       <ChatPage {...{ phase, pageVariants, pageTransition, messages, isTyping, input, setInput, handleMicClick, listening, handleSend, toggleTts, ttsEnabled }} />
     </div>

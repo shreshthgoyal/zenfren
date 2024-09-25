@@ -37,6 +37,9 @@ body {
   background-color: #6366f1;
 }
 
+
+
+
 @media (max-width: 768px) {
   h1 {
     font-size: 1.5rem;
