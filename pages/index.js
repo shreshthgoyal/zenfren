@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Sunrise } from 'lucide-react';
 import BreathingExercise from '@/components/BreathingExercise';
@@ -6,6 +7,67 @@ import MeditationComponent from '@/components/MeditationComponent';
 
 export default function Home() {
   const router = useRouter();
+  const [loadingReflect, setLoadingReflect] = useState(false);
+  const [loadingConnect, setLoadingConnect] = useState(false);
+
+  // Function to handle Reflect click event
+  const handleReflectClick = async () => {
+    setLoadingReflect(true);
+    let docId = localStorage.getItem('docId'); // Check if docId exists in local storage
+
+    if (docId) {
+      // If docId exists, redirect to the existing document
+      window.open(`https://docs.google.com/document/d/${docId}/edit`);
+    } else {
+      try {
+        // Call your API to create the document
+        const response = await fetch('/api/createDoc', {
+          method: 'POST',
+        });
+
+
+        const { docId } = await response.json();
+
+        // Save the new docId to local storage
+        localStorage.setItem('docId', docId);
+
+        // Redirect to the newly created document
+        window.open(`https://docs.google.com/document/d/${docId}/edit`);
+      } catch (error) {
+        console.error('Error creating doc:', error);
+      }
+    }
+    setLoadingReflect(false);
+  };
+
+  const handleConnectClick = async () => {
+    setLoadingConnect(true);
+    let sheetId = localStorage.getItem('sheetId'); // Check if docId exists in local storage
+
+    if (sheetId) {
+      // If docId exists, redirect to the existing document
+      window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
+    } else {
+      try {
+        // Call your API to create the document
+        const response = await fetch('/api/createSheet', {
+          method: 'POST',
+        });
+
+
+        const { sheetId } = await response.json();
+
+        // Save the new docId to local storage
+        localStorage.setItem('sheetId', sheetId);
+
+        // Redirect to the newly created document
+        window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
+      } catch (error) {
+        console.error('Error creating doc:', error);
+      }
+    }
+    setLoadingConnect(false);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -93,7 +155,7 @@ export default function Home() {
         >
           Take the first step.
         </motion.button>
-        
+
         <motion.div 
           className="mt-16"
           variants={containerVariants}
@@ -101,13 +163,14 @@ export default function Home() {
           <p className="text-lg mb-6">Discover paths to tranquility:</p>
           <div className="flex justify-center space-x-8">
             {[
-              { icon: MessageCircle, label: "Reflect" },
-              { icon: Users, label: "Connect" },
+              { icon: MessageCircle, label: "Reflect", onClick: handleReflectClick },
+              { icon: Users, label: "Connect", onClick: handleConnectClick },
               { icon: Sunrise, label: "Grow" },
             ].map((item, index) => (
               <motion.div 
                 key={index}
                 className="text-center cursor-pointer"
+                onClick={item.onClick} // Attach click handler if available
                 variants={itemVariants}
                 whileHover={{ scale: 1.1 }}
               >
