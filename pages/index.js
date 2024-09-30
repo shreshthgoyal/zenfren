@@ -1,12 +1,11 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users } from 'lucide-react';
+import { Sticker, BookHeart } from 'lucide-react';
 import BreathingExercise from '@/components/BreathingExercise';
 import MeditationComponent from '@/components/MeditationComponent';
 import Modal from 'react-modal';
 
-// Set the app element for accessibility purposes
 Modal.setAppElement('#__next');
 
 export default function Home() {
@@ -15,53 +14,47 @@ export default function Home() {
   const [loadingConnect, setLoadingConnect] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [email, setEmail] = useState('');
-  const [currentAction, setCurrentAction] = useState(null); // Keep track of which button was clicked
+  const [currentAction, setCurrentAction] = useState(null);
 
-  // Function to handle Reflect click event
   const handleReflectClick = async () => {
     setLoadingReflect(true);
-    let docId = localStorage.getItem('docId'); // Check if docId exists in local storage
+    let docId = localStorage.getItem('docId');
 
     if (docId) {
-      // If docId exists, redirect to the existing document
       window.open(`https://docs.google.com/document/d/${docId}/edit`);
     } else {
-      setCurrentAction('reflect'); // Set action to 'reflect'
-      setShowEmailPopup(true); // Show the email popup if no docId found
+      setCurrentAction('reflect');
+      setShowEmailPopup(true);
     }
     setLoadingReflect(false);
   };
 
-  // Function to handle Connect click event
   const handleConnectClick = async () => {
     setLoadingConnect(true);
-    let sheetId = localStorage.getItem('sheetId'); // Check if sheetId exists in local storage
-
+    let sheetId = localStorage.getItem('sheetId');
     if (sheetId) {
-      // If sheetId exists, redirect to the existing sheet
       window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
     } else {
-      setCurrentAction('connect'); // Set action to 'connect'
-      setShowEmailPopup(true); // Show the email popup if no sheetId found
+      setCurrentAction('connect');
+      setShowEmailPopup(true);
     }
     setLoadingConnect(false);
   };
 
-  // Function to handle document or sheet creation based on the current action
   const handleCreateDocOrSheet = async () => {
+    if (!email) return;
+
     try {
       const endpoint = currentAction === 'reflect' ? '/api/createDoc' : '/api/createSheet';
-      // Call the appropriate API based on the action
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }), // Send email to the backend
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
       const { docId, sheetId } = data;
 
-      // Save the new docId or sheetId to local storage
       if (currentAction === 'reflect') {
         localStorage.setItem('docId', docId);
         window.open(`https://docs.google.com/document/d/${docId}/edit`);
@@ -70,7 +63,6 @@ export default function Home() {
         window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
       }
 
-      // Close the popup
       setShowEmailPopup(false);
     } catch (error) {
       console.error('Error creating document or sheet:', error);
@@ -79,30 +71,38 @@ export default function Home() {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.3 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.3 } },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: 'spring', stiffness: 100 },
-    },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F0FF] to-[#F0E6FF] text-[#3A3A5C] font-sans overflow-hidden flex items-center justify-center">
-      <motion.div
-        className="max-w-3xl w-full px-6 py-12 text-center"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Main Content */}
+      <motion.div className="max-w-3xl w-full px-6 py-12 text-center" variants={containerVariants} initial="hidden" animate="visible">
+        <motion.div className="mb-12 relative" variants={itemVariants}>
+          <svg className="w-40 h-40 mx-auto" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#7C3AED">
+                  <animate attributeName="offset" values="0;1;0" dur="20s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stopColor="#3B82F6">
+                  <animate attributeName="offset" values="1;0;1" dur="20s" repeatCount="indefinite" />
+                </stop>
+              </linearGradient>
+            </defs>
+            <path d="M100,10 C150,10 190,50 190,100 C190,150 150,190 100,190 C50,190 10,150 10,100 C10,50 50,10 100,10 Z" fill="none" stroke="url(#gradient)" strokeWidth="4">
+              <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="20s" repeatCount="indefinite" />
+            </path>
+            <path d="M100,30 C130,30 160,60 160,100 C160,140 130,170 100,170 C70,170 40,140 40,100 C40,60 70,30 100,30 Z" fill="none" stroke="url(#gradient)" strokeWidth="4">
+              <animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="15s" repeatCount="indefinite" />
+            </path>
+          </svg>
+        </motion.div>
+
         <motion.h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight" variants={itemVariants}>
           Hey there! Welcome to <span className="text-[#7C3AED]">ZenFren</span>
         </motion.h1>
@@ -111,7 +111,6 @@ export default function Home() {
           A warm hug for your soul.
         </motion.p>
 
-        {/* Call to Action Button */}
         <motion.button
           onClick={() => router.push('/express')}
           className="bg-[#7C3AED] text-white px-10 py-4 rounded-full text-xl font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 shadow-lg"
@@ -122,13 +121,12 @@ export default function Home() {
           Take the first step.
         </motion.button>
 
-        {/* Options for Reflect and Connect */}
         <motion.div className="mt-16" variants={containerVariants}>
           <p className="text-lg mb-6">Discover paths to tranquility:</p>
           <div className="flex justify-center space-x-8">
             {[
-              { icon: MessageCircle, label: 'Reflect', onClick: handleReflectClick },
-              { icon: Users, label: 'Connect', onClick: handleConnectClick },
+              { icon: BookHeart, label: 'Reflect', onClick: handleReflectClick },
+              { icon: Sticker, label: 'Mood', onClick: handleConnectClick },
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -140,7 +138,7 @@ export default function Home() {
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
                   <item.icon className="w-8 h-8 text-[#7C3AED]" />
                 </div>
-                <p className="text-sm font-medium">{item.label}</p>
+                <p className="text-sm font-medium text-indigo-700">{item.label}</p>
               </motion.div>
             ))}
             <MeditationComponent triggerType="icon" />
@@ -152,42 +150,42 @@ export default function Home() {
           Take a deep breath, you've got this. ZenFren is by your side.
         </motion.p>
 
-        {/* Email Modal Popup */}
         <Modal
           isOpen={showEmailPopup}
           onRequestClose={() => setShowEmailPopup(false)}
           contentLabel="Email Modal"
-          style={{
-            content: {
-              top: '50%',
-              left: '50%',
-              right: 'auto',
-              bottom: 'auto',
-              marginRight: '-50%',
-              transform: 'translate(-50%, -50%)',
-              width: '400px',
-              padding: '20px',
-              borderRadius: '10px',
-            },
-            overlay: {
-              backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            },
-          }}
+          className="fixed inset-0 flex items-center justify-center outline-none"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-75"
         >
-          <h2 className="text-2xl font-semibold mb-4">Enter your Email</h2>
-          <input
-            type="email"
-            placeholder="Enter your email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 mb-4 border rounded-md"
-          />
-          <button
-            onClick={handleCreateDocOrSheet}
-            className="bg-[#7C3AED] text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out"
-          >
-            Submit
-          </button>
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6 space-y-6">
+            <button
+              onClick={() => setShowEmailPopup(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              aria-label="Close"
+            >
+              &#x2715;
+            </button>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Let's Take a Step Towards a Healthier Mind
+            </h2>
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button
+              onClick={handleCreateDocOrSheet}
+              className="w-full bg-[#7C3AED] text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out"
+            >
+              Begin Your Healing Journey
+            </button>
+            <hr className="border-t border-gray-300 my-2" />
+            <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+              We value your privacy. The email you provide will be used solely to ensure secure access to the shared resources.
+            </p>
+          </div>
         </Modal>
       </motion.div>
     </div>

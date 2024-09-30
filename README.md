@@ -1,7 +1,5 @@
-integrate journal and mood tracking properly
+integrate journal and mood tracking properly in buttons with good template
 update home screen icons and label
+add timeout from backend server
 service account key.json to .env
-add button for actions in message
-deploy backend on render, frontend on vercel
-test everything
 update readme
