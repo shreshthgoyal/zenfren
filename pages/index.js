@@ -170,7 +170,7 @@ export default function Home() {
             </h2>
             <input
               type="email"
-              placeholder="Enter your email address"
+              placeholder="Enter your gmail address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"

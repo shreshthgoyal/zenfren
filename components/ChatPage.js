@@ -131,7 +131,7 @@ export default function ChatPage({
             return messages.map((message, index) => {
               const isBot = message.sender === 'bot';
               if (isBot) botMessageCount++;
-              const showActions = isBot && (botMessageCount === 1 || botMessageCount % 3 === 0);
+              const showActions = isBot && (botMessageCount === 1 || botMessageCount % 3 === 0) && message.action;
               const customMessage = showActions ? CustomActionMessage : '';
 
               return (

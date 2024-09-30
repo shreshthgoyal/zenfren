@@ -47,31 +47,51 @@ export default function ExpressAndChat() {
       setMessages(prev => [...prev, { text: userMessage, sender: 'user' }]);
       setInput('');
       setIsTyping(true);
-
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: userMessage, sessionId })
-      }).then(res => res.json());
-
-      setIsTyping(false);
-
-      const newMessage = {
-        text: response.response || `I understand that you may be feeling upset or frustrated right now.
-        However, using harmful language is not the solution. There are healthier ways to express your emotions. Would you like to talk about what's bothering you?`,
-        sender: 'bot',
-        action: response.action || null
-      };
-
-      setMessages(prev => [...prev, newMessage]);
-
-      if (ttsEnabled) {
-        speak(newMessage.text);
+  
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), 50000)
+      );
+  
+      try {
+        const response = await Promise.race([
+          fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: userMessage, sessionId })
+          }).then(res => res.json()),
+          timeoutPromise
+        ]);
+  
+        setIsTyping(false);
+  
+        const newMessage = {
+          text: response.response || `I understand that you may be feeling upset or frustrated right now.
+          However, using harmful language is not the solution. There are healthier ways to express your emotions. Would you like to talk about what's bothering you?`,
+          sender: 'bot',
+          action: response.action || null
+        };
+  
+        setMessages(prev => [...prev, newMessage]);
+  
+        if (ttsEnabled) {
+          speak(newMessage.text);
+        }
+      } catch (error) {
+        setIsTyping(false);
+  
+        const timeoutMessage = {
+          text: 'It seems we’re having a little trouble connecting. Take a deep breath and we’ll try again soon.',
+          sender: 'bot',
+          action: ["medidate", "breathe"]
+        };
+  
+        setMessages(prev => [...prev, timeoutMessage]);
       }
     }
-  };
+  }
+  
 
   const handleExpress = () => sendMessage();
   const handleSend = () => sendMessage();
