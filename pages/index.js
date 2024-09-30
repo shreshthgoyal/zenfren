@@ -1,14 +1,21 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users, Sunrise } from 'lucide-react';
+import { MessageCircle, Users } from 'lucide-react';
 import BreathingExercise from '@/components/BreathingExercise';
 import MeditationComponent from '@/components/MeditationComponent';
+import Modal from 'react-modal';
+
+// Set the app element for accessibility purposes
+Modal.setAppElement('#__next');
 
 export default function Home() {
   const router = useRouter();
   const [loadingReflect, setLoadingReflect] = useState(false);
   const [loadingConnect, setLoadingConnect] = useState(false);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [email, setEmail] = useState('');
+  const [currentAction, setCurrentAction] = useState(null); // Keep track of which button was clicked
 
   // Function to handle Reflect click event
   const handleReflectClick = async () => {
@@ -19,134 +26,93 @@ export default function Home() {
       // If docId exists, redirect to the existing document
       window.open(`https://docs.google.com/document/d/${docId}/edit`);
     } else {
-      try {
-        // Call your API to create the document
-        const response = await fetch('/api/createDoc', {
-          method: 'POST',
-        });
-
-
-        const { docId } = await response.json();
-
-        // Save the new docId to local storage
-        localStorage.setItem('docId', docId);
-
-        // Redirect to the newly created document
-        window.open(`https://docs.google.com/document/d/${docId}/edit`);
-      } catch (error) {
-        console.error('Error creating doc:', error);
-      }
+      setCurrentAction('reflect'); // Set action to 'reflect'
+      setShowEmailPopup(true); // Show the email popup if no docId found
     }
     setLoadingReflect(false);
   };
 
+  // Function to handle Connect click event
   const handleConnectClick = async () => {
     setLoadingConnect(true);
-    let sheetId = localStorage.getItem('sheetId'); // Check if docId exists in local storage
+    let sheetId = localStorage.getItem('sheetId'); // Check if sheetId exists in local storage
 
     if (sheetId) {
-      // If docId exists, redirect to the existing document
+      // If sheetId exists, redirect to the existing sheet
       window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
     } else {
-      try {
-        // Call your API to create the document
-        const response = await fetch('/api/createSheet', {
-          method: 'POST',
-        });
-
-
-        const { sheetId } = await response.json();
-
-        // Save the new docId to local storage
-        localStorage.setItem('sheetId', sheetId);
-
-        // Redirect to the newly created document
-        window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
-      } catch (error) {
-        console.error('Error creating doc:', error);
-      }
+      setCurrentAction('connect'); // Set action to 'connect'
+      setShowEmailPopup(true); // Show the email popup if no sheetId found
     }
     setLoadingConnect(false);
   };
 
+  // Function to handle document or sheet creation based on the current action
+  const handleCreateDocOrSheet = async () => {
+    try {
+      const endpoint = currentAction === 'reflect' ? '/api/createDoc' : '/api/createSheet';
+      // Call the appropriate API based on the action
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }), // Send email to the backend
+      });
+
+      const data = await response.json();
+      const { docId, sheetId } = data;
+
+      // Save the new docId or sheetId to local storage
+      if (currentAction === 'reflect') {
+        localStorage.setItem('docId', docId);
+        window.open(`https://docs.google.com/document/d/${docId}/edit`);
+      } else {
+        localStorage.setItem('sheetId', sheetId);
+        window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
+      }
+
+      // Close the popup
+      setShowEmailPopup(false);
+    } catch (error) {
+      console.error('Error creating document or sheet:', error);
+    }
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.3 }
-    }
+      transition: { staggerChildren: 0.3 },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100 }
-    }
+      transition: { type: 'spring', stiffness: 100 },
+    },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E6F0FF] to-[#F0E6FF] text-[#3A3A5C] font-sans overflow-hidden flex items-center justify-center">
-      <motion.div 
+      <motion.div
         className="max-w-3xl w-full px-6 py-12 text-center"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.div 
-          className="mb-12 relative"
-          variants={itemVariants}
-        >
-          <svg className="w-40 h-40 mx-auto" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#7C3AED">
-                  <animate attributeName="offset" values="0;1;0" dur="20s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="100%" stopColor="#3B82F6">
-                  <animate attributeName="offset" values="1;0;1" dur="20s" repeatCount="indefinite" />
-                </stop>
-              </linearGradient>
-            </defs>
-            <path d="M100,10 C150,10 190,50 190,100 C190,150 150,190 100,190 C50,190 10,150 10,100 C10,50 50,10 100,10 Z" fill="none" stroke="url(#gradient)" strokeWidth="4">
-              <animateTransform
-                attributeName="transform"
-                type="rotate"
-                from="0 100 100"
-                to="360 100 100"
-                dur="20s"
-                repeatCount="indefinite"
-              />
-            </path>
-            <path d="M100,30 C130,30 160,60 160,100 C160,140 130,170 100,170 C70,170 40,140 40,100 C40,60 70,30 100,30 Z" fill="none" stroke="url(#gradient)" strokeWidth="4">
-              <animateTransform
-                attributeName="transform"
-                type="rotate"
-                from="360 100 100"
-                to="0 100 100"
-                dur="15s"
-                repeatCount="indefinite"
-              />
-            </path>
-          </svg>
-        </motion.div>
-        
-        <motion.h1 
-          className="text-5xl md:text-6xl font-bold mb-6 leading-tight"
-          variants={itemVariants}
-        >
+        {/* Main Content */}
+        <motion.h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight" variants={itemVariants}>
           Hey there! Welcome to <span className="text-[#7C3AED]">ZenFren</span>
         </motion.h1>
-        
-        <motion.p 
-          className="text-xl md:text-2xl mb-12 text-[#5A5A7D]"
-          variants={itemVariants}
-        >
+
+        <motion.p className="text-xl md:text-2xl mb-12 text-[#5A5A7D]" variants={itemVariants}>
           A warm hug for your soul.
         </motion.p>
-        
-        <motion.button 
+
+        {/* Call to Action Button */}
+        <motion.button
           onClick={() => router.push('/express')}
           className="bg-[#7C3AED] text-white px-10 py-4 rounded-full text-xl font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 shadow-lg"
           variants={itemVariants}
@@ -156,20 +122,18 @@ export default function Home() {
           Take the first step.
         </motion.button>
 
-        <motion.div 
-          className="mt-16"
-          variants={containerVariants}
-        >
+        {/* Options for Reflect and Connect */}
+        <motion.div className="mt-16" variants={containerVariants}>
           <p className="text-lg mb-6">Discover paths to tranquility:</p>
           <div className="flex justify-center space-x-8">
             {[
-              { icon: MessageCircle, label: "Reflect", onClick: handleReflectClick },
-              { icon: Users, label: "Connect", onClick: handleConnectClick },
+              { icon: MessageCircle, label: 'Reflect', onClick: handleReflectClick },
+              { icon: Users, label: 'Connect', onClick: handleConnectClick },
             ].map((item, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 className="text-center cursor-pointer text-[#7C3AED]"
-                onClick={item.onClick} // Attach click handler if available
+                onClick={item.onClick}
                 variants={itemVariants}
                 whileHover={{ scale: 1.1 }}
               >
@@ -179,17 +143,52 @@ export default function Home() {
                 <p className="text-sm font-medium">{item.label}</p>
               </motion.div>
             ))}
-            <MeditationComponent triggerType="icon"/>
-            <BreathingExercise triggerType="icon"/>
+            <MeditationComponent triggerType="icon" />
+            <BreathingExercise triggerType="icon" />
           </div>
         </motion.div>
 
-        <motion.p 
-          className="mt-16 text-lg text-[#5A5A7D]"
-          variants={itemVariants}
-        >
+        <motion.p className="mt-16 text-lg text-[#5A5A7D]" variants={itemVariants}>
           Take a deep breath, you've got this. ZenFren is by your side.
         </motion.p>
+
+        {/* Email Modal Popup */}
+        <Modal
+          isOpen={showEmailPopup}
+          onRequestClose={() => setShowEmailPopup(false)}
+          contentLabel="Email Modal"
+          style={{
+            content: {
+              top: '50%',
+              left: '50%',
+              right: 'auto',
+              bottom: 'auto',
+              marginRight: '-50%',
+              transform: 'translate(-50%, -50%)',
+              width: '400px',
+              padding: '20px',
+              borderRadius: '10px',
+            },
+            overlay: {
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            },
+          }}
+        >
+          <h2 className="text-2xl font-semibold mb-4">Enter your Email</h2>
+          <input
+            type="email"
+            placeholder="Enter your email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 mb-4 border rounded-md"
+          />
+          <button
+            onClick={handleCreateDocOrSheet}
+            className="bg-[#7C3AED] text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out"
+          >
+            Submit
+          </button>
+        </Modal>
       </motion.div>
     </div>
   );
