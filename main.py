@@ -12,6 +12,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
+
 app = Flask(__name__)
 store: Dict[str, Dict[str, Any]] = {}  # Each session_id maps to a dict with 'history' and 'emotion'
 public_url = os.getenv("PUBLIC_URL", "https://your-ngrok-url.com")
@@ -104,7 +105,12 @@ def create_prompt(emotion, session_id, crisis_detected=False):
                     "system",
                     "You are a conversational mental health assistant. Provide emotional support like a caring friend.\n\n"
                     f"{emo_prompt}\n\n"
-                    "Answer in a friendly and conversational manner, like talking to a close friend."
+                    "Answer in a friendly and conversational manner, like talking to a close friend. Answer in short, in plain text format"
+                    "Answer in three lines, one line to be emphatetic to console the user based on their emotion."
+                    "Answer in next line on how they can cope up with their situtation"
+                    "Answer in next line with one or two follow up questions to keep the conversation continue in such a way that user feels comfortable sharing stuff with you"
+                    "Dont answer in paragraphs, and only three sentences in plain text as specified."
+                    "Dont ask questions which can further trigger the user."
                 ),
                 MessagesPlaceholder(variable_name="history"),
                 MessagesPlaceholder(variable_name="messages"),
@@ -115,12 +121,12 @@ def handle_action(emotion, crisis_detected=False):
     if crisis_detected:
         return "It sounds like you’re going through something really tough right now. I highly recommend talking to someone who can help you, like a mental health professional or a crisis counselor. Would you like me to provide you with contact information for support?"
     actions = {
-        "joy": "How about sharing this joy with a friend or writing it down so you can come back to it later?",
-        "sadness": "It might help to take a few deep breaths or try a short mindfulness exercise.",
-        "anger": "Let’s try a calming exercise. Take a deep breath in... hold it... and slowly let it out.",
-        "fear": "I have a grounding technique we can try. Focus on your surroundings to bring you back to the present moment."
+        "joy": ["write", "medidate"],
+        "sadness": ["breathe", "write"],
+        "anger": ["medidate", "breathe"],
+        "fear": ["medidate"],
     }
-    return actions.get(emotion, "I'm here to support you in any way I can. Feel free to share more.")
+    return actions.get(emotion, ["general"])
 
 def generate_response(text, session_id):
     emotion = get_session_emotion(session_id)
