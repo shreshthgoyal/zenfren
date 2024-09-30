@@ -175,6 +175,10 @@ def chat():
         'response': response_content,
         'action': suggested_action
     })
+    
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
