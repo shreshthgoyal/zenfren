@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
     try {
-      const response = await fetch('http://127.0.0.1:5000/chat', {
+      const response = await fetch('https://zenfren.onrender.com/chat', {
         method: 'POST',
         // add headers to the request with cors
         headers: {

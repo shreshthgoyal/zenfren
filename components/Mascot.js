@@ -6,14 +6,21 @@ const AnimatedCompanion = () => {
   const [message, setMessage] = useState('');
 
   const messages = [
-    "Hi there!",
-    "You got this!",
-    "Stay positive!",
-    "Keep going!",
-    "Believe in you!",
-    "Smile :)",
-    "You're great!",
-    "Good vibes~",
+    "You're a gem 💎",
+    "Stay vibrant, love! 🌿",
+    "Warm hugs 🤗",
+    "You've got this, dear! ✨",
+    "Believe in your magic ✨",
+    "You're never alone 🌿",
+    "Embrace your glow ☀️",
+    "Radiate kindness, always 🌸",
+    "You're making a difference 🌍",
+    "Keep shining bright ⭐",
+    "Stay rooted and rise 🌱",
+    "You're a treasure 🌟",
+    "Sending positive vibes 🍃",
+    "You're deeply appreciated 💗",
+    "Stay wonderfully you 🌼",
   ];
 
   const handleHover = () => {

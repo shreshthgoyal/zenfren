@@ -165,11 +165,10 @@ export default function Home() {
             {[
               { icon: MessageCircle, label: "Reflect", onClick: handleReflectClick },
               { icon: Users, label: "Connect", onClick: handleConnectClick },
-              { icon: Sunrise, label: "Grow" },
             ].map((item, index) => (
               <motion.div 
                 key={index}
-                className="text-center cursor-pointer"
+                className="text-center cursor-pointer text-[#7C3AED]"
                 onClick={item.onClick} // Attach click handler if available
                 variants={itemVariants}
                 whileHover={{ scale: 1.1 }}
