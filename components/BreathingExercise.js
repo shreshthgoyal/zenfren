@@ -112,7 +112,7 @@ const BreathingExercise = ({ triggerType = "button", triggerText = "Open Breathi
   };
 
   const TriggerComponent = triggerType === "icon" ? (
-    <div className="text-center cursor-pointer">
+    <div className="text-center cursor-pointer hover:scale-105">
       <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-md">
         <Leaf className="w-8 h-8 text-[#7C3AED]" />
       </div>
