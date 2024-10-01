@@ -23,22 +23,25 @@ export default async function handler(req, res) {
     });
 
     // Create an authenticated Google Sheets API client
-    const sheets = google.sheets({ version: 'v4', auth });
+    const drive = google.drive({ version: 'v3', auth });
+
+    const fileMetadata = {
+      name: 'Mood Tracker',
+      mimeType: 'application/vnd.google-apps.spreadsheet',
+      parents: ['1iBMv_ZPX44oTSx1NqZmKSbUm8ns1rBCp'], // Replace with your folder ID
+    };
+
+    const templateSheetID = '1dl6foh_1RHHtxZqdATACpkgmfE5jGDiLpf-L5sMgOyA';
 
     // Create a new Google Sheet with the Sheets API
-    const createResponse = await sheets.spreadsheets.create({
-      resource: {
-        properties: {
-          title: 'Mood Tracker',
-        },
-      },
+    const file = await drive.files.copy({
+      resource: fileMetadata,
+      fileId: templateSheetID,
     });
 
     // Get the new sheet ID from the response
-    const sheetId = createResponse.data.spreadsheetId;
+    const sheetId = file.data.id;
 
-    // Create an authenticated Google Drive API client for permission escalation
-    const drive = google.drive({ version: 'v3', auth });
 
     // Escalate permissions for the specified email
     await drive.permissions.create({

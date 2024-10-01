@@ -6,9 +6,9 @@ Modal.setAppElement('#__next');
 export default function EmailModal({ isOpen, onClose, onSubmit, action }) {
   const [email, setEmail] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (email) {
-      onSubmit(email, action);
+      await onSubmit(email, action);
       setEmail('');
     }
   };
