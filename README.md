@@ -12,9 +12,7 @@
 </div>
 
 <div align = "center">
-<a href="https://zen-fren.vercel.app/">
  <img src="https://i.ibb.co/C5jP1Kp/Screenshot-from-2024-10-01-15-39-07.png" alt="ZenFren">
- </a>
 </div>
 ZenFren is an AI-powered chatbot that provides personalized mental health support to students. It leverages advanced natural language processing and emotion classification techniques to engage in empathetic conversations, offering guidance, coping strategies, and resources tailored to each user's needs.
 
