@@ -147,7 +147,10 @@ export default function Home() {
         </motion.div>
 
         <motion.p className="mt-16 text-lg text-[#5A5A7D]" variants={itemVariants}>
-          Take a deep breath, you've got this. ZenFren is by your side.
+          Take a deep breath, you've got this. ZenFren is by your side, 24/7.
+        </motion.p>
+        <motion.p className="mt-4 text-lg text-[#5A5A7D]" variants={itemVariants}>
+          We value your anonymity. Your conversations with us are confidential.
         </motion.p>
 
         <Modal
