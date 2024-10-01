@@ -4,12 +4,12 @@ const useCreateDocOrSheet = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Safe to access browser-specific APIs here
-    }
+    if (typeof window === 'undefined') return;
+
   }, []);
 
   const handleCreateDocOrSheet = async (email, action, onSuccess) => {
+    if (typeof window === 'undefined') return; 
     if (!email) return;
 
     setLoading(true);
@@ -33,7 +33,7 @@ const useCreateDocOrSheet = () => {
         window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
       }
 
-      onSuccess(); // Call the onSuccess callback to handle post-creation actions.
+      onSuccess();
     } catch (error) {
       console.error('Error creating document or sheet:', error);
     }

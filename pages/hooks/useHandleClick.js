@@ -4,18 +4,22 @@ const useHandleClick = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Safe to access browser-specific APIs here
-    }
+    if (typeof window === 'undefined') return;
+
+    // Safe to access browser-specific APIs here
   }, []);
 
   const handleClick = async (actionType, setCurrentAction, setShowEmailPopup) => {
+    if (typeof window === 'undefined') return;
+
     setLoading(true);
-    
     let id = localStorage.getItem(`${actionType}Id`);
 
     if (id) {
-      const url = actionType === 'doc' ? `https://docs.google.com/document/d/${id}/edit` : `https://docs.google.com/spreadsheets/d/${id}/edit`;
+      const url =
+        actionType === 'doc'
+          ? `https://docs.google.com/document/d/${id}/edit`
+          : `https://docs.google.com/spreadsheets/d/${id}/edit`;
       window.open(url);
     } else {
       setCurrentAction(actionType);
