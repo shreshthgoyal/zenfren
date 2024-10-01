@@ -18,7 +18,6 @@ const WriteAction = () => {
   const [currentAction, setCurrentAction] = useState('doc');
   const { loading: createLoading, handleCreateDocOrSheet } = useCreateDocOrSheet();
   const { loading: loadingReflect, handleClick: handleReflectClick } = useHandleClick();
-  const { loading: loadingConnect, handleClick: handleConnectClick } = useHandleClick();
 
   const handleCreateDocumentOrSheet = (email, action) => {
     handleCreateDocOrSheet(email, action, () => {

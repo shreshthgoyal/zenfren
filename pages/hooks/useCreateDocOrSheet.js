@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const useCreateDocOrSheet = () => {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Safe to access browser-specific APIs here
+    }
+  }, []);
 
   const handleCreateDocOrSheet = async (email, action, onSuccess) => {
     if (!email) return;
