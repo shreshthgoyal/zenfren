@@ -15,6 +15,16 @@ const WriteAction = () => (
   </Button>
 );
 
+const CrisisAction = () => (
+  <Button 
+  className="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg shadow-lg w-48 mx-auto block transform transition duration-300 ease-in-out hover:bg-red-600 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50"
+  onClick={() => (window.location.href = 'tel:919820466726')}
+>
+  SOS
+</Button>
+
+);
+
 const BreatheAction = () => (
   <BreathingExercise triggerType="button" triggerText="Breathe Zen" />
 );
@@ -83,6 +93,7 @@ export default function ChatPage({
 
   const renderActionButton = (action) => {
     const actionType = action.toLowerCase();
+    console.log(actionType)
     switch (actionType) {
       case 'write':
         return <WriteAction />;
@@ -90,6 +101,8 @@ export default function ChatPage({
         return <BreatheAction />;
       case 'meditate':
         return <MeditateAction />;
+      case 'crisis':
+        return <CrisisAction />;
       default:
         return <GeneralAction />;
     }
@@ -131,7 +144,7 @@ export default function ChatPage({
             return messages.map((message, index) => {
               const isBot = message.sender === 'bot';
               if (isBot) botMessageCount++;
-              const showActions = isBot && (botMessageCount === 1 || botMessageCount % 3 === 0) && message.action;
+              const showActions = (isBot && (botMessageCount === 1 || botMessageCount % 3 === 0) && message.action) || message.action === 'crisis';
               const customMessage = showActions ? CustomActionMessage : '';
 
               return (

@@ -84,7 +84,7 @@ export default function ExpressAndChat() {
         const timeoutMessage = {
           text: 'It seems we’re having a little trouble connecting. Take a deep breath and we’ll try again soon.',
           sender: 'bot',
-          action: ["medidate", "breathe"]
+          action: ["breathe"]
         };
   
         setMessages(prev => [...prev, timeoutMessage]);
