@@ -9,7 +9,6 @@ export default function EmailModal({ isOpen, onClose, onSubmit, action }) {
   const handleSubmit = async () => {
     if (email) {
       await onSubmit(email, action);
-      setEmail('');
     }
   };
 

@@ -13,8 +13,6 @@ import EmailModal from '@/components/EmailModal';
 import useCreateDocOrSheet from '@/pages/hooks/useCreateDocOrSheet';
 import useHandleClick from '@/pages/hooks/useHandleClick';
 
-
-
 const WriteAction = () => {
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [currentAction, setCurrentAction] = useState('doc');
