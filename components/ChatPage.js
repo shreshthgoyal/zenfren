@@ -29,24 +29,23 @@ const WriteAction = () => {
   };
 
   const handleWriteClick = () => {
-    setCurrentAction('doc'); // Set the action type to 'doc'
-    setShowEmailPopup(true); // Open the modal
+    setCurrentAction('doc');  
+    setShowEmailPopup(true); 
   };
 
   return (<>
     <Button
       onClick={() => handleReflectClick('doc', setCurrentAction, setShowEmailPopup)}
-      className="w-full bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+      variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-100"
     >
-      Write
+      Mindful Notes
     </Button>
 
-    {/* Render the EmailModal */}
     <EmailModal
       isOpen={showEmailPopup}
       onClose={() => setShowEmailPopup(false)}
       onSubmit={handleCreateDocumentOrSheet}
-      action={currentAction} // Pass the 'doc' action to the modal
+      action={currentAction} 
     />
   </>);
 };
@@ -65,24 +64,23 @@ const TrackMoodAction = () => {
   };
 
   const handleWriteClick = () => {
-    setCurrentAction('sheet'); // Set the action type to 'doc'
-    setShowEmailPopup(true); // Open the modal
+    setCurrentAction('sheet');
+    setShowEmailPopup(true); 
   };
 
   return (<>
     <Button
       onClick={() => handleConnectClick('sheet', setCurrentAction, setShowEmailPopup)}
-      className="w-full bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+      variant="outline" className="border-cyan-300 text-cyan-600 hover:bg-cyan-200"
     >
-      Track Mood
+      Mood Meter
     </Button>
 
-    {/* Render the EmailModal */}
     <EmailModal
       isOpen={showEmailPopup}
       onClose={() => setShowEmailPopup(false)}
       onSubmit={handleCreateDocumentOrSheet}
-      action={currentAction} // Pass the 'doc' action to the modal
+      action={currentAction}
     />
   </>);
 };
@@ -170,7 +168,10 @@ export default function ChatPage({
     console.log(actionType)
     switch (actionType) {
       case 'write':
-        return <WriteAction />;
+        return <div className="flex flex-row space-x-2">
+        <WriteAction />
+        <TrackMoodAction />
+      </div>
       case 'breathe':
         return <BreatheAction />;
       case 'meditate':

@@ -119,7 +119,7 @@ const BreathingExercise = ({ triggerType = "button", triggerText = "Open Breathi
       <p className="text-sm font-medium text-indigo-700">Breathe</p>
     </div>
   ) : (
-    <Button variant="outline" className="border-indigo-300 text-indigo-600 hover:bg-indigo-100">
+    <Button variant="outline" className="border-indigo-300 text-indigo-600 hover:bg-indigo-200">
       {triggerText}
     </Button>
   );
