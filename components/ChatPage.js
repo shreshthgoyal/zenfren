@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MicButton from './MicButton';
 import { FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
@@ -8,12 +9,83 @@ import { BsSend } from "react-icons/bs";
 import BreathingExercise from './BreathingExercise';
 import MeditationComponent from './MeditationComponent';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import EmailModal from '@/components/EmailModal';
+import useCreateDocOrSheet from '@/pages/hooks/useCreateDocOrSheet';
+import useHandleClick from '@/pages/hooks/useHandleClick';
 
-const WriteAction = () => (
-  <Button className="w-full bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-    Write
-  </Button>
-);
+
+
+const WriteAction = () => {
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [currentAction, setCurrentAction] = useState('doc');
+  const { loading: createLoading, handleCreateDocOrSheet } = useCreateDocOrSheet();
+  const { loading: loadingReflect, handleClick: handleReflectClick } = useHandleClick();
+  const { loading: loadingConnect, handleClick: handleConnectClick } = useHandleClick();
+
+  const handleCreateDocumentOrSheet = (email, action) => {
+    handleCreateDocOrSheet(email, action, () => {
+      setShowEmailPopup(false);
+    });
+  };
+
+  const handleWriteClick = () => {
+    setCurrentAction('doc'); // Set the action type to 'doc'
+    setShowEmailPopup(true); // Open the modal
+  };
+
+  return (<>
+    <Button
+      onClick={() => handleReflectClick('doc', setCurrentAction, setShowEmailPopup)}
+      className="w-full bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+    >
+      Write
+    </Button>
+
+    {/* Render the EmailModal */}
+    <EmailModal
+      isOpen={showEmailPopup}
+      onClose={() => setShowEmailPopup(false)}
+      onSubmit={handleCreateDocumentOrSheet}
+      action={currentAction} // Pass the 'doc' action to the modal
+    />
+  </>);
+};
+
+const TrackMoodAction = () => {
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [currentAction, setCurrentAction] = useState('doc');
+  const { loading: createLoading, handleCreateDocOrSheet } = useCreateDocOrSheet();
+  const { loading: loadingReflect, handleClick: handleReflectClick } = useHandleClick();
+  const { loading: loadingConnect, handleClick: handleConnectClick } = useHandleClick();
+
+  const handleCreateDocumentOrSheet = (email, action) => {
+    handleCreateDocOrSheet(email, action, () => {
+      setShowEmailPopup(false);
+    });
+  };
+
+  const handleWriteClick = () => {
+    setCurrentAction('sheet'); // Set the action type to 'doc'
+    setShowEmailPopup(true); // Open the modal
+  };
+
+  return (<>
+    <Button
+      onClick={() => handleConnectClick('sheet', setCurrentAction, setShowEmailPopup)}
+      className="w-full bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+    >
+      Track Mood
+    </Button>
+
+    {/* Render the EmailModal */}
+    <EmailModal
+      isOpen={showEmailPopup}
+      onClose={() => setShowEmailPopup(false)}
+      onSubmit={handleCreateDocumentOrSheet}
+      action={currentAction} // Pass the 'doc' action to the modal
+    />
+  </>);
+};
 
 const CrisisAction = () => (
   <Button 
@@ -38,6 +110,7 @@ const GeneralAction = () => (
     <BreatheAction />
     <MeditateAction />
     <WriteAction />
+    <TrackMoodAction />
   </div>
 );
 
@@ -57,6 +130,7 @@ const ActionPopover = () => (
         <BreatheAction />
         <MeditateAction />
         <WriteAction />
+        <TrackMoodAction />
       </div>
     </PopoverContent>
   </Popover>

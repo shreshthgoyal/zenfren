@@ -4,69 +4,22 @@ import { motion } from 'framer-motion';
 import { Sticker, BookHeart } from 'lucide-react';
 import BreathingExercise from '@/components/BreathingExercise';
 import MeditationComponent from '@/components/MeditationComponent';
-import Modal from 'react-modal';
-
-Modal.setAppElement('#__next');
+import EmailModal from '@/components/EmailModal';
+import useHandleClick from '@/pages/hooks/useHandleClick';
+import useCreateDocOrSheet from '@/pages/hooks/useCreateDocOrSheet';
 
 export default function Home() {
   const router = useRouter();
-  const [loadingReflect, setLoadingReflect] = useState(false);
-  const [loadingConnect, setLoadingConnect] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
-  const [email, setEmail] = useState('');
   const [currentAction, setCurrentAction] = useState(null);
+  const { loading: loadingReflect, handleClick: handleReflectClick } = useHandleClick();
+  const { loading: loadingConnect, handleClick: handleConnectClick } = useHandleClick();
+  const { loading: createLoading, handleCreateDocOrSheet } = useCreateDocOrSheet();
 
-  const handleReflectClick = async () => {
-    setLoadingReflect(true);
-    let docId = localStorage.getItem('docId');
-
-    if (docId) {
-      window.open(`https://docs.google.com/document/d/${docId}/edit`);
-    } else {
-      setCurrentAction('reflect');
-      setShowEmailPopup(true);
-    }
-    setLoadingReflect(false);
-  };
-
-  const handleConnectClick = async () => {
-    setLoadingConnect(true);
-    let sheetId = localStorage.getItem('sheetId');
-    if (sheetId) {
-      window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
-    } else {
-      setCurrentAction('connect');
-      setShowEmailPopup(true);
-    }
-    setLoadingConnect(false);
-  };
-
-  const handleCreateDocOrSheet = async () => {
-    if (!email) return;
-
-    try {
-      const endpoint = currentAction === 'reflect' ? '/api/createDoc' : '/api/createSheet';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-      const { docId, sheetId } = data;
-
-      if (currentAction === 'reflect') {
-        localStorage.setItem('docId', docId);
-        window.open(`https://docs.google.com/document/d/${docId}/edit`);
-      } else {
-        localStorage.setItem('sheetId', sheetId);
-        window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
-      }
-
+  const handleCreateDocumentOrSheet = (email, action) => {
+    handleCreateDocOrSheet(email, action, () => {
       setShowEmailPopup(false);
-    } catch (error) {
-      console.error('Error creating document or sheet:', error);
-    }
+    });
   };
 
   const containerVariants = {
@@ -124,9 +77,8 @@ export default function Home() {
         <motion.div className="mt-16" variants={containerVariants}>
           <p className="text-lg mb-6">Discover paths to tranquility:</p>
           <div className="flex justify-center space-x-8">
-            {[
-              { icon: BookHeart, label: 'Reflect', onClick: handleReflectClick },
-              { icon: Sticker, label: 'Mood', onClick: handleConnectClick },
+            {[{ icon: BookHeart, label: 'Reflect', onClick: () => handleReflectClick('doc', setCurrentAction, setShowEmailPopup) },
+              { icon: Sticker, label: 'Mood', onClick: () => handleConnectClick('sheet', setCurrentAction, setShowEmailPopup) },
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -153,43 +105,12 @@ export default function Home() {
           We value your anonymity. Your conversations with us are confidential.
         </motion.p>
 
-        <Modal
+        <EmailModal
           isOpen={showEmailPopup}
-          onRequestClose={() => setShowEmailPopup(false)}
-          contentLabel="Email Modal"
-          className="fixed inset-0 flex items-center justify-center outline-none"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-75"
-        >
-          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6 space-y-6">
-            <button
-              onClick={() => setShowEmailPopup(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              aria-label="Close"
-            >
-              &#x2715;
-            </button>
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Let's Take a Step Towards a Healthier Mind
-            </h2>
-            <input
-              type="email"
-              placeholder="Enter your gmail address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-            <button
-              onClick={handleCreateDocOrSheet}
-              className="w-full bg-[#7C3AED] text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-[#9F7AEA] transition-all duration-300 ease-in-out"
-            >
-              Begin Your Healing Journey
-            </button>
-            <hr className="border-t border-gray-300 my-2" />
-            <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-              We value your privacy. The email you provide will be used solely to ensure secure access to the shared resources.
-            </p>
-          </div>
-        </Modal>
+          onClose={() => setShowEmailPopup(false)}
+          onSubmit={handleCreateDocumentOrSheet}
+          action={currentAction}
+        />
       </motion.div>
     </div>
   );
