@@ -4,9 +4,8 @@ const useHandleClick = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // This hook only needs to execute in the browser.
     if (typeof window === 'undefined') return;
-
-    // Safe to access browser-specific APIs here
   }, []);
 
   const handleClick = async (actionType, setCurrentAction, setShowEmailPopup) => {

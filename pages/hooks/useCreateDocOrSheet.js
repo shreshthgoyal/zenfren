@@ -4,12 +4,12 @@ const useCreateDocOrSheet = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
+    if (typeof window === 'undefined') return; 
   }, []);
 
   const handleCreateDocOrSheet = async (email, action, onSuccess) => {
     if (typeof window === 'undefined') return; 
+
     if (!email) return;
 
     setLoading(true);
