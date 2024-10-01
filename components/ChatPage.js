@@ -10,8 +10,8 @@ import BreathingExercise from './BreathingExercise';
 import MeditationComponent from './MeditationComponent';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import EmailModal from '@/components/EmailModal';
-import useCreateDocOrSheet from '@/pages/hooks/useCreateDocOrSheet';
-import useHandleClick from '@/pages/hooks/useHandleClick';
+import useCreateDocOrSheet from '@/hooks/useCreateDocOrSheet';
+import useHandleClick from '@/hooks/useHandleClick';
 
 const WriteAction = () => {
   const [showEmailPopup, setShowEmailPopup] = useState(false);

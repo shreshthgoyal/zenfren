@@ -5,8 +5,8 @@ import { Sticker, BookHeart } from 'lucide-react';
 import BreathingExercise from '@/components/BreathingExercise';
 import MeditationComponent from '@/components/MeditationComponent';
 import EmailModal from '@/components/EmailModal';
-import useHandleClick from '@/pages/hooks/useHandleClick';
-import useCreateDocOrSheet from '@/pages/hooks/useCreateDocOrSheet';
+import useHandleClick from '@/hooks/useHandleClick';
+import useCreateDocOrSheet from '@/hooks/useCreateDocOrSheet';
 
 export default function Home() {
   const router = useRouter();
