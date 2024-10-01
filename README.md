@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/shreshthgoyal/zenfren">
-    <img src="https://i.ibb.co/34d2JKv/Screenshot-from-2024-09-30-14-53-24-removebg-preview.png" alt="Logo" width="80" height="80">
+    <img src="https://i.ibb.co/b7p5V7B/Screenshot-from-2024-10-02-02-02-39.png" alt="Logo" width="80" height="80">
   </a>
 <h3 align="center">ZenFren</h3>
   <p align="center">
