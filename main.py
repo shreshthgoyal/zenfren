@@ -70,7 +70,7 @@ def classify_emotion(text):
 def detect_crisis(text):
     crisis_keywords = [
         "self-harm", "suicide", "hurt myself", "kill myself", "end my life",
-        "cut myself", "depressed", "overdose", "harm myself", "worthless"
+        "cut myself", "depressed", "overdose", "harm myself", "worthless", "want to die"
     ]
     text_lower = text.lower()
     for keyword in crisis_keywords:
@@ -107,7 +107,7 @@ def create_prompt(emotion, session_id, crisis_detected=False):
                     f"{emo_prompt}\n\n"
                     "Answer in a friendly and conversational manner, like talking to a close friend. Answer in short, in plain text format"
                     "Answer in three lines, one line to be emphatetic to console the user based on their emotion."
-                    "Answer in next line on how they can cope up with their situtation"
+                    "Answer in next line on how they can cope up with their situtation, keep this in 2-3 sentence, and in a friendly tone."
                     "Answer in next line with one or two follow up questions to keep the conversation continue in such a way that user feels comfortable sharing stuff with you"
                     "Dont answer in paragraphs, and only three sentences in plain text as specified."
                     "Dont ask questions which can further trigger the user."
@@ -119,7 +119,7 @@ def create_prompt(emotion, session_id, crisis_detected=False):
 
 def handle_action(emotion, crisis_detected=False):
     if crisis_detected:
-        return "It sounds like you’re going through something really tough right now. I highly recommend talking to someone who can help you, like a mental health professional or a crisis counselor. Would you like me to provide you with contact information for support?"
+        return ["crisis"]
     actions = {
         "joy": ["write", "medidate"],
         "sadness": ["breathe", "write"],
