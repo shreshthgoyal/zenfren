@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
+import { saveDocumentIdToLocalStorage } from '@/services/documentService';
 
 const useCreateDocOrSheet = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return; 
+    if (typeof window === 'undefined') return;
   }, []);
 
   const handleCreateDocOrSheet = async (email, action, onSuccess) => {
-    if (typeof window === 'undefined') return; 
+    if (typeof window === 'undefined') return;
 
     if (!email) return;
 
@@ -26,10 +27,10 @@ const useCreateDocOrSheet = () => {
       const { docId, sheetId } = data;
 
       if (action === 'doc') {
-        localStorage.setItem('docId', docId);
+        saveDocumentIdToLocalStorage('doc', docId);
         window.open(`https://docs.google.com/document/d/${docId}/edit`);
       } else {
-        localStorage.setItem('sheetId', sheetId);
+        saveDocumentIdToLocalStorage('sheet', sheetId);
         window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`);
       }
 
